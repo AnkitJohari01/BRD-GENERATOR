@@ -9,3 +9,4 @@ python-docx
 whisper
 moviepy
 python-dotenv
+pypandoc
