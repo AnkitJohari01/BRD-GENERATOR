@@ -1,17 +1,21 @@
 import whisper
 import tempfile
+import os
 
 # Load whisper model once
 model = whisper.load_model("base")
 
 def transcribe_audio(file):
 
-    # Create a temporary file to store uploaded audio
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+    # Get original extension
+    file_extension = os.path.splitext(file.name)[1]
+
+    # Save uploaded file temporarily
+    with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_audio:
         temp_audio.write(file.read())
         temp_path = temp_audio.name
 
-    # Run transcription
+    # Transcribe audio/video
     result = model.transcribe(temp_path)
 
     return result["text"]
