@@ -107,6 +107,11 @@ import pypandoc
 import tempfile
 from io import BytesIO
 
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 # Import your internal logic
 from services.document_loader import load_document
 from services.transcription import transcribe_audio
