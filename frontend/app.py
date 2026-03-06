@@ -103,26 +103,29 @@
 
 
 import streamlit as st
-st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
 import pypandoc
 import tempfile
-from io import BytesIO
-
 import sys
 import os
 
+# Debug: check if API key loaded
+st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
+
+# Fix import path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-# Import your internal logic
+# Import internal modules
 from services.document_loader import load_document
 from services.transcription import transcribe_audio
 from agents.brd_writer_agent import generate_brd
+
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="BRD Generator AI", layout="wide")
 
 st.title("BRD Generator AI")
 st.write("Upload meeting recordings or requirement documents to generate a BRD.")
+
 
 # ---------- FILE UPLOAD ----------
 uploaded_files = st.file_uploader(
@@ -131,12 +134,14 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
+
 # ---------- SHOW FILES ----------
 if uploaded_files:
     st.subheader("Uploaded Files")
 
     for file in uploaded_files:
         st.write(f"• {file.name}")
+
 
 # ---------- GENERATE BRD ----------
 if st.button("Generate BRD"):
@@ -151,28 +156,55 @@ if st.button("Generate BRD"):
 
         for file in uploaded_files:
 
-            file_ext = file.name.split(".")[-1].lower()
+            try:
 
-            # ----- Document files -----
-            if file_ext in ["pdf", "docx", "txt"]:
-                text = load_document(file)
-                extracted_text += "\n" + text
+                file_ext = file.name.split(".")[-1].lower()
 
-            # ----- Audio / Video files -----
-            elif file_ext in ["mp3", "wav", "mp4"]:
-                text = transcribe_audio(file)
-                extracted_text += "\n" + text
+                # Reset pointer (important for Streamlit uploads)
+                file.seek(0)
 
-    if not extracted_text:
-        st.error("Could not extract text from files.")
+                # ----- Document files -----
+                if file_ext in ["pdf", "docx", "txt"]:
+
+                    text = load_document(file)
+
+                    if text:
+                        extracted_text += "\n" + text
+
+
+                # ----- Audio / Video files -----
+                elif file_ext in ["mp3", "wav", "mp4"]:
+
+                    text = transcribe_audio(file)
+
+                    if text:
+                        extracted_text += "\n" + text
+
+
+                else:
+                    st.warning(f"Unsupported file type: {file.name}")
+
+            except Exception as e:
+                st.error(f"Error processing {file.name}: {str(e)}")
+
+
+    if not extracted_text.strip():
+        st.error("Could not extract text from the uploaded files.")
         st.stop()
+
 
     # ---------- GENERATE BRD ----------
     with st.spinner("Generating BRD using AI..."):
 
-        brd_text = generate_brd(extracted_text)
+        try:
+            brd_text = generate_brd(extracted_text)
+        except Exception as e:
+            st.error(f"BRD generation failed: {str(e)}")
+            st.stop()
+
 
     st.success("BRD generated successfully!")
+
 
     # ---------- SHOW OUTPUT ----------
     st.subheader("Generated BRD")
@@ -183,25 +215,37 @@ if st.button("Generate BRD"):
         height=500
     )
 
-    # ---------- INSTALL PANDOC ----------
+
+    # ---------- ENSURE PANDOC ----------
     try:
         pypandoc.get_pandoc_version()
-    except:
-        pypandoc.download_pandoc()
+    except OSError:
+        with st.spinner("Installing Pandoc..."):
+            pypandoc.download_pandoc()
+
 
     # ---------- CONVERT TO WORD ----------
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmpfile:
-        output_path = tmpfile.name
+    try:
 
-    pypandoc.convert_text(
-        brd_text,
-        "docx",
-        format="md",
-        outputfile=output_path
-    )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmpfile:
+            output_path = tmpfile.name
 
-    with open(output_path, "rb") as f:
-        doc_bytes = f.read()
+        pypandoc.convert_text(
+            brd_text,
+            "docx",
+            format="md",
+            outputfile=output_path
+        )
+
+        with open(output_path, "rb") as f:
+            doc_bytes = f.read()
+
+        os.remove(output_path)
+
+    except Exception as e:
+        st.error(f"Word conversion failed: {str(e)}")
+        st.stop()
+
 
     # ---------- DOWNLOAD ----------
     st.download_button(
