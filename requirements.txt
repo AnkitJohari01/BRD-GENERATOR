@@ -1,9 +1,9 @@
 streamlit
+pypandoc
+pdfplumber
+python-docx
 openai
 langchain
 langchain-openai
-pypandoc
-python-docx
 whisper
 ffmpeg-python
-pydub
