@@ -10,3 +10,5 @@ whisper
 moviepy
 python-dotenv
 pypandoc
+openai-whisper
+ffmpeg-python
