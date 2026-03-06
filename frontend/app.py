@@ -103,6 +103,7 @@
 
 
 import streamlit as st
+st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
 import pypandoc
 import tempfile
 from io import BytesIO
