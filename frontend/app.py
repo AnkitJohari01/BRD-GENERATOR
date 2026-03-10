@@ -1,106 +1,33 @@
-# import streamlit as st
-# import requests
-
-# API_URL = "http://127.0.0.1:8000/generate-brd/"
-
-# st.set_page_config(page_title="BRD Generator AI", layout="wide")
-
-# st.title("BRD Generator AI")
-# st.write("Upload meeting recordings or requirement documents to generate a BRD.")
-
-# uploaded_files = st.file_uploader(
-#     "Upload files",
-#     type=["pdf", "docx", "txt", "mp3", "wav", "mp4"],
-#     accept_multiple_files=True
-# )
-
-# if uploaded_files:
-#     st.subheader("Uploaded Files")
-#     for file in uploaded_files:
-#         st.write(f"• {file.name}")
-
-
-# if st.button("Generate BRD"):
-
-#     if not uploaded_files:
-#         st.warning("Please upload at least one file.")
-#         st.stop()
-
-#     files = []
-
-#     for file in uploaded_files:
-#         files.append(
-#             ("files", (file.name, file.getvalue(), file.type))
-#         )
-
-#     with st.spinner("Processing files and generating BRD..."):
-
-#         try:
-#             response = requests.post(API_URL, files=files)
-
-#             if response.status_code != 200:
-#                 st.error(f"API Error: {response.text}")
-#                 st.stop()
-
-#             data = response.json()
-
-#             # Debug output (optional)
-#             # st.write(data)
-
-#             if data.get("status") == "success":
-
-#                 st.success(data.get("message"))
-
-#                 st.subheader("Generated BRD")
-
-#                 st.text_area(
-#                     "BRD Output",
-#                     value=data.get("brd"),
-#                     height=500
-#                 )
-
-#             else:
-#                 st.error(data.get("error", "Unknown error occurred"))
-
-#         except requests.exceptions.ConnectionError:
-#             st.error("Could not connect to FastAPI server. Make sure it is running.")
-
-#         except Exception as e:
-#             st.error(f"Unexpected error: {str(e)}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import os
+import sys
+import tempfile
+
+# from torch import dot
+
+# from torch import dot
+
+# Pandoc path
 os.environ["PATH"] += r";C:\Program Files\Pandoc"
+
+# Graphviz path
+os.environ["PATH"] += os.pathsep + r"C:\Program Files\Graphviz\bin"
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import streamlit as st
 import requests
 import pypandoc
-from io import BytesIO
-import tempfile
+from graphviz import Digraph
+
+from backend.agents.architecture_agent import generate_architecture_diagrams
+
 
 API_URL = "http://127.0.0.1:8000/generate-brd/"
 
 st.set_page_config(page_title="BRD Generator AI", layout="wide")
 
 st.title("BRD Generator AI")
-st.write("Upload meeting recordings or requirement documents to generate a BRD.")
+st.write("Upload requirement documents or recordings to generate a BRD and architecture diagrams.")
 
 uploaded_files = st.file_uploader(
     "Upload files",
@@ -113,6 +40,105 @@ if uploaded_files:
     for file in uploaded_files:
         st.write(f"• {file.name}")
 
+
+# ---------------- SAFE GRAPHVIZ RENDER ----------------
+
+def render_graphviz(mermaid_code):
+    
+    if not mermaid_code:
+        return None
+
+    try:
+
+        nodes = set()
+        edges = []
+
+        lines = mermaid_code.split("\n")
+
+        for line in lines:
+
+            line = line.strip()
+
+            if "-->" in line:
+
+                parts = line.split("-->")
+
+                if len(parts) != 2:
+                    continue
+
+                src = parts[0].strip().replace(" ", "_")
+                dst = parts[1].strip().replace(" ", "_")
+
+                nodes.add(src)
+                nodes.add(dst)
+
+                edges.append((src, dst))
+
+        node_count = len(nodes)
+
+        dot = Digraph(format="png")
+
+        # Dynamic layout
+        if node_count > 5:
+            dot.attr(rankdir="LR")
+            dot.attr(size="16,9!")
+        else:
+            dot.attr(rankdir="TB")
+            dot.attr(size="9,16!")
+
+        dot.attr(dpi="600")
+
+        dot.attr(
+            "node",
+            shape="box",
+            style="rounded,filled",
+            color="#2c3e50",
+            fillcolor="#ecf0f1",
+            fontname="Helvetica",
+            fontsize="16",
+            width="2.5",
+            height="1",
+            fixedsize="false"
+        )
+
+        if not nodes:
+            nodes.add("Architecture")
+
+        for node in nodes:
+
+            label = node.replace("_", " ")
+
+            words = label.split()
+
+            wrapped = "\n".join(
+                [" ".join(words[i:i+2]) for i in range(0, len(words), 2)]
+            )
+
+            dot.node(node, label=wrapped)
+
+        for src, dst in edges:
+            dot.edge(src, dst)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+
+            file_path = os.path.join(tmpdir, "diagram")
+
+            dot.render(file_path, format="png", cleanup=True)
+
+            with open(file_path + ".png", "rb") as f:
+                img_bytes = f.read()
+
+        return img_bytes
+
+    except Exception as e:
+
+        st.error(f"Diagram generation error: {e}")
+
+        return None
+
+
+# ---------------- GENERATE BRD ----------------
+
 if st.button("Generate BRD"):
 
     if not uploaded_files:
@@ -122,13 +148,12 @@ if st.button("Generate BRD"):
     files = []
 
     for file in uploaded_files:
-        files.append(
-            ("files", (file.name, file.getvalue(), file.type))
-        )
+        files.append(("files", (file.name, file.getvalue(), file.type)))
 
     with st.spinner("Processing files and generating BRD..."):
 
         try:
+
             response = requests.post(API_URL, files=files)
 
             if response.status_code != 200:
@@ -137,47 +162,106 @@ if st.button("Generate BRD"):
 
             data = response.json()
 
-            if data.get("status") == "success":
+            if not isinstance(data, dict):
+                st.error("Invalid API response format.")
+                st.stop()
 
-                brd_text = data.get("brd")
+            if data.get("status") != "success":
+                st.error(data.get("error", "Unknown error occurred"))
+                st.stop()
 
-                st.success(data.get("message"))
+            brd_text = data.get("brd", "")
 
-                st.subheader("Generated BRD")
+            if not brd_text:
+                st.error("BRD generation failed.")
+                st.stop()
 
-                st.text_area(
-                    "BRD Output",
-                    value=brd_text,
-                    height=500
-                )
+            st.success(data.get("message", "BRD generated successfully."))
 
-                # -------- Convert Markdown → Word --------
+            # ---------------- BRD DISPLAY ----------------
+
+            st.subheader("Generated BRD")
+
+            st.text_area(
+                "BRD Output",
+                value=brd_text,
+                height=500
+            )
+
+            # ---------------- DIAGRAM GENERATION ----------------
+
+            with st.spinner("Generating Architecture Diagrams..."):
+
+                diagrams = {}
+
+                try:
+                    diagrams = generate_architecture_diagrams(brd_text)
+                except Exception as e:
+                    st.warning(f"Diagram generation failed: {e}")
+
+            tab1, tab2, tab3 = st.tabs([
+                "System Architecture",
+                "Component Diagram",
+                "Data Flow Diagram"
+            ])
+
+            diagram_map = [
+                ("system_architecture", "System Architecture", tab1),
+                ("component_diagram", "Component Diagram", tab2),
+                ("data_flow_diagram", "Data Flow Diagram", tab3),
+            ]
+
+            for key, title, tab in diagram_map:
+
+                with tab:
+
+                    diagram_code = diagrams.get(key, "")
+
+                    img = render_graphviz(diagram_code)
+
+                    if img:
+
+                        st.image(img)
+
+                        st.download_button(
+                            f"Download {title}",
+                            img,
+                            f"{key}.png",
+                            "image/png"
+                        )
+
+                    else:
+                        st.info(f"{title} diagram not available.")
+
+            # ---------------- WORD EXPORT ----------------
+
+            try:
+
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmpfile:
                     output_path = tmpfile.name
 
                 pypandoc.convert_text(
                     brd_text,
-                    'docx',
-                    format='md',
+                    "docx",
+                    format="md",
                     outputfile=output_path
                 )
 
                 with open(output_path, "rb") as f:
                     doc_bytes = f.read()
 
-                # -------- Download Button --------
                 st.download_button(
-                    label="Download BRD as Word Document",
-                    data=doc_bytes,
-                    file_name="Generated_BRD.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    "Download BRD as Word Document",
+                    doc_bytes,
+                    "Generated_BRD.docx",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
 
-            else:
-                st.error(data.get("error", "Unknown error occurred"))
+            except Exception as e:
+                st.warning(f"Word export failed: {e}")
 
         except requests.exceptions.ConnectionError:
-            st.error("Could not connect to FastAPI server. Make sure it is running.")
+            st.error("Could not connect to FastAPI server. Please start the backend.")
 
         except Exception as e:
             st.error(f"Unexpected error: {str(e)}")
