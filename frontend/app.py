@@ -10,7 +10,7 @@ import tempfile
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Backend imports
-from backend.agents.architecture_agent import generate_architecture_diagrams
+from agents.architecture_agent import generate_architecture_diagrams
 from services.document_loader import load_document
 from services.transcription import transcribe_audio
 from agents.brd_writer_agent import generate_brd
