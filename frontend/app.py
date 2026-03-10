@@ -1,137 +1,13 @@
-<<<<<<< HEAD
-import os
-import sys
-import tempfile
-
-# from torch import dot
-
-# from torch import dot
-
-# Pandoc path
-os.environ["PATH"] += r";C:\Program Files\Pandoc"
-
-# Graphviz path
-os.environ["PATH"] += os.pathsep + r"C:\Program Files\Graphviz\bin"
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-=======
-# import os
-# os.environ["PATH"] += r";C:\Program Files\Pandoc"
-# import streamlit as st
-# import requests
-# import pypandoc
-# from io import BytesIO
-# import tempfile
-# import pypandoc
-
-# API_URL = "http://127.0.0.1:8000/generate-brd/"
-
-# st.set_page_config(page_title="BRD Generator AI", layout="wide")
-
-# st.title("BRD Generator AI")
-# st.write("Upload meeting recordings or requirement documents to generate a BRD.")
-
-# uploaded_files = st.file_uploader(
-#     "Upload files",
-#     type=["pdf", "docx", "txt", "mp3", "wav", "mp4"],
-#     accept_multiple_files=True
-# )
-
-# if uploaded_files:
-#     st.subheader("Uploaded Files")
-#     for file in uploaded_files:
-#         st.write(f"• {file.name}")
-
-# if st.button("Generate BRD"):
-
-#     if not uploaded_files:
-#         st.warning("Please upload at least one file.")
-#         st.stop()
-
-#     files = []
-
-#     for file in uploaded_files:
-#         files.append(
-#             ("files", (file.name, file.getvalue(), file.type))
-#         )
-
-#     with st.spinner("Processing files and generating BRD..."):
-
-#         try:
-#             response = requests.post(API_URL, files=files)
-
-#             if response.status_code != 200:
-#                 st.error(f"API Error: {response.text}")
-#                 st.stop()
-
-#             data = response.json()
-
-#             if data.get("status") == "success":
-
-#                 brd_text = data.get("brd")
-
-#                 st.success(data.get("message"))
-
-#                 st.subheader("Generated BRD")
-
-#                 st.text_area(
-#                     "BRD Output",
-#                     value=brd_text,
-#                     height=500
-#                 )
-
-#                 # -------- Convert Markdown → Word --------
-#                 with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmpfile:
-#                     output_path = tmpfile.name
-
-#                 pypandoc.convert_text(
-#                     brd_text,
-#                     'docx',
-#                     format='md',
-#                     outputfile=output_path
-#                 )
-
-#                 with open(output_path, "rb") as f:
-#                     doc_bytes = f.read()
-
-#                 # -------- Download Button --------
-#                 st.download_button(
-#                     label="Download BRD as Word Document",
-#                     data=doc_bytes,
-#                     file_name="Generated_BRD.docx",
-#                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-#                 )
-
-#             else:
-#                 st.error(data.get("error", "Unknown error occurred"))
-
-#         except requests.exceptions.ConnectionError:
-#             st.error("Could not connect to FastAPI server. Make sure it is running.")
-
-#         except Exception as e:
-#             st.error(f"Unexpected error: {str(e)}")
-
-
-
-
-
-
-
-
->>>>>>> 5b7d98c57d075b48e9084ed70679114fa287573f
-
 import streamlit as st
 import pypandoc
-<<<<<<< HEAD
 from graphviz import Digraph
 
 from backend.agents.architecture_agent import generate_architecture_diagrams
 
-=======
 import tempfile
 import sys
 import os
->>>>>>> 5b7d98c57d075b48e9084ed70679114fa287573f
+
 
 # Debug: check if API key loaded
 st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
@@ -168,7 +44,6 @@ if uploaded_files:
         st.write(f"• {file.name}")
 
 
-<<<<<<< HEAD
 # ---------------- SAFE GRAPHVIZ RENDER ----------------
 
 def render_graphviz(mermaid_code):
@@ -266,10 +141,6 @@ def render_graphviz(mermaid_code):
 
 
 # ---------------- GENERATE BRD ----------------
-
-=======
-# ---------- GENERATE BRD ----------
->>>>>>> 5b7d98c57d075b48e9084ed70679114fa287573f
 if st.button("Generate BRD"):
 
     if not uploaded_files:
@@ -277,14 +148,10 @@ if st.button("Generate BRD"):
         st.stop()
 
     extracted_text = ""
-
-<<<<<<< HEAD
     for file in uploaded_files:
         files.append(("files", (file.name, file.getvalue(), file.type)))
-=======
-    with st.spinner("Processing files..."):
->>>>>>> 5b7d98c57d075b48e9084ed70679114fa287573f
 
+    with st.spinner("Processing files..."):
         for file in uploaded_files:
 
             try:
@@ -328,7 +195,6 @@ if st.button("Generate BRD"):
     with st.spinner("Generating BRD using AI..."):
 
         try:
-<<<<<<< HEAD
 
             response = requests.post(API_URL, files=files)
 
@@ -439,9 +305,7 @@ if st.button("Generate BRD"):
         except requests.exceptions.ConnectionError:
             st.error("Could not connect to FastAPI server. Please start the backend.")
 
-=======
             brd_text = generate_brd(extracted_text)
->>>>>>> 5b7d98c57d075b48e9084ed70679114fa287573f
         except Exception as e:
             st.error(f"BRD generation failed: {str(e)}")
             st.stop()
