@@ -198,23 +198,7 @@ if st.button("Generate BRD"):
 
         try:
 
-            response = requests.post(API_URL, files=files)
-
-            if response.status_code != 200:
-                st.error(f"API Error: {response.text}")
-                st.stop()
-
-            data = response.json()
-
-            if not isinstance(data, dict):
-                st.error("Invalid API response format.")
-                st.stop()
-
-            if data.get("status") != "success":
-                st.error(data.get("error", "Unknown error occurred"))
-                st.stop()
-
-            brd_text = data.get("brd", "")
+            brd_text = generate_brd(extracted_text)
 
             if not brd_text:
                 st.error("BRD generation failed.")
@@ -304,10 +288,10 @@ if st.button("Generate BRD"):
             except Exception as e:
                 st.warning(f"Word export failed: {e}")
 
-        except requests.exceptions.ConnectionError:
-            st.error("Could not connect to FastAPI server. Please start the backend.")
+        # except requests.exceptions.ConnectionError:
+        #     st.error("Could not connect to FastAPI server. Please start the backend.")
 
-            brd_text = generate_brd(extracted_text)
+            # brd_text = generate_brd(extracted_text)
         except Exception as e:
             st.error(f"BRD generation failed: {str(e)}")
             st.stop()
