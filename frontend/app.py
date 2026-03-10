@@ -16,7 +16,7 @@ from services.transcription import transcribe_audio
 from agents.brd_writer_agent import generate_brd
 
 # Backend API
-API_URL = "http://127.0.0.1:8000/generate-brd/"
+# API_URL = "http://127.0.0.1:8000/generate-brd/"
 
 # Debug: check if API key loaded
 st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
