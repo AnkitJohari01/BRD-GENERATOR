@@ -278,12 +278,6 @@ if st.button("Generate BRD"):
                 with open(output_path, "rb") as f:
                     doc_bytes = f.read()
 
-                st.download_button(
-                    "Download BRD as Word Document",
-                    doc_bytes,
-                    "Generated_BRD.docx",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
 
             except Exception as e:
                 st.warning(f"Word export failed: {e}")
