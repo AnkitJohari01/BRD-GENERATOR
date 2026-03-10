@@ -1,8 +1,6 @@
-import os
-from dotenv import load_dotenv
+import streamlit as st
 
-# load environment variables
-load_dotenv()
+# Read API key from Streamlit Secrets
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY")
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME")
+MODEL_NAME = "gpt-4.1"
