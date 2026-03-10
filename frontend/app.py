@@ -2,16 +2,15 @@ import streamlit as st
 import pypandoc
 from graphviz import Digraph
 
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from backend.agents.architecture_agent import generate_architecture_diagrams
 
 import tempfile
-import sys
+
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 # Debug: check if API key loaded
