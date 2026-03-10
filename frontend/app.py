@@ -2,15 +2,15 @@ import streamlit as st
 import pypandoc
 from graphviz import Digraph
 
-
-from backend.agents.architecture_agent import generate_architecture_diagrams
-
-import tempfile
-
 import os
 import sys
+import tempfile
 
+# Add project root to Python path (IMPORTANT)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Now imports will work
+from backend.agents.architecture_agent import generate_architecture_diagrams
 
 
 # Debug: check if API key loaded
