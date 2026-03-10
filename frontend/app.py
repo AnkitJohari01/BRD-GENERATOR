@@ -204,7 +204,7 @@ if st.button("Generate BRD"):
                 st.error("BRD generation failed.")
                 st.stop()
 
-            st.success(data.get("message", "BRD generated successfully."))
+            st.success("BRD generated successfully.")
 
             # ---------------- BRD DISPLAY ----------------
 
