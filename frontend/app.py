@@ -6,23 +6,20 @@ import os
 import sys
 import tempfile
 
-# Add project root to Python path (IMPORTANT)
+# Add project root to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Now imports will work
+# Backend imports
 from backend.agents.architecture_agent import generate_architecture_diagrams
-
-
-# Debug: check if API key loaded
-st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
-
-# Fix import path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-# Import internal modules
 from services.document_loader import load_document
 from services.transcription import transcribe_audio
 from agents.brd_writer_agent import generate_brd
+
+# Backend API
+API_URL = "http://127.0.0.1:8000/generate-brd/"
+
+# Debug: check if API key loaded
+st.write("API Loaded:", "OPENAI_API_KEY" in st.secrets)
 
 
 # ---------- PAGE CONFIG ----------
@@ -152,6 +149,7 @@ if st.button("Generate BRD"):
         st.stop()
 
     extracted_text = ""
+    files = []
     for file in uploaded_files:
         files.append(("files", (file.name, file.getvalue(), file.type)))
 
@@ -313,9 +311,6 @@ if st.button("Generate BRD"):
         except Exception as e:
             st.error(f"BRD generation failed: {str(e)}")
             st.stop()
-
-
-    st.success("BRD generated successfully!")
 
 
     # ---------- SHOW OUTPUT ----------
