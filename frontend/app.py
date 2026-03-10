@@ -297,16 +297,6 @@ if st.button("Generate BRD"):
             st.stop()
 
 
-    # ---------- SHOW OUTPUT ----------
-    st.subheader("Generated BRD")
-
-    st.text_area(
-        "BRD Output",
-        value=brd_text,
-        height=500
-    )
-
-
     # ---------- ENSURE PANDOC ----------
     try:
         pypandoc.get_pandoc_version()
