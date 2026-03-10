@@ -1,12 +1,18 @@
 from langchain_openai import ChatOpenAI
-from backend.config import OPENAI_API_KEY, MODEL_NAME
+import streamlit as st
 
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY")
+MODEL_NAME = "gpt-4.1"
+
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not found in Streamlit secrets.")
 
 # Initialize LLM
 llm = ChatOpenAI(
     api_key=OPENAI_API_KEY,
     model=MODEL_NAME,
-    temperature=0.1
+    temperature=0.1,
+    timeout=60
 )
 
 
