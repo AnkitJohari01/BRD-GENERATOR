@@ -1,52 +1,3 @@
-
-# from langchain_openai import ChatOpenAI
-# from config import OPENAI_API_KEY, MODEL_NAME
-
-# llm = ChatOpenAI(
-#     openai_api_key=OPENAI_API_KEY,
-#     model_name=MODEL_NAME
-# )
-
-# def generate_brd(validated_data):
-
-#     prompt = f"""
-#     Generate a professional Business Requirement Document (BRD).
-
-#     Sections:
-
-#     1. Executive Summary
-#     2. Project Overview
-#     3. Business Objectives
-#     4. Scope of the Project
-#        - In Scope
-#        - Out of Scope
-#     5. Stakeholders
-#     6. Functional Requirements
-#     7. Non-Functional Requirements
-#     8. Data Requirements
-#     9. Assumptions
-#     10. Constraints
-#     11. Dependencies
-#     12. Risks and Mitigation
-#     13. Success Criteria
-#     14. Future Enhancements
-
-#     Use structured headings and bullet points.
-
-#     Data:
-#     {validated_data}
-#     """
-
-#     response = llm.invoke(prompt)
-
-#     return response.content
-
-
-
-
-
-
-
 from langchain_openai import ChatOpenAI
 from config import OPENAI_API_KEY, MODEL_NAME
 
@@ -60,36 +11,54 @@ llm = ChatOpenAI(
 def generate_brd(validated_data):
 
     prompt = f"""
-You are a business analyst.
+You are a Senior Business Analyst and Enterprise Documentation Specialist.
 
-Generate a structured Business Requirement Document (BRD)
-using ONLY the information provided.
+Your task is to generate a professional Business Requirements Document (BRD)
+based on the validated project information provided.
 
-Do NOT invent requirements.
+Follow these instructions carefully:
 
-If information is missing, mention "Not specified".
+1. Use clear, structured, and professional business language.
+2. Follow the section headings EXACTLY as provided.
+3. Expand each section with detailed and relevant content.
+4. Ensure the document is suitable for stakeholders, project managers, and technical teams.
+5. If specific information is missing, make reasonable professional assumptions.
+6. Maintain logical flow from business context to technical requirements.
 
-Sections:
+The BRD must contain the following sections in the same order.
+
+BRD Structure:
 
 1. Executive Summary
-2. Project Overview
-3. Business Objectives
-4. Scope of the Project
+2. Business Problem / Current Pain Points
+3. Business Objectives & Expected Outcomes
+4. Solution Overview
+5. Project Scope
    - In Scope
    - Out of Scope
-5. Stakeholders
-6. Functional Requirements
-7. Non-Functional Requirements
-8. Data Requirements
-9. Assumptions
-10. Constraints
-11. Dependencies
-12. Risks and Mitigation
-13. Success Criteria
-14. Future Enhancements
+6. Stakeholders
+7. Functional Requirements
+8. Non-Functional Requirements
+9. Data Requirements
+10. System Architecture Overview
+11. Assumptions
+12. Constraints
+13. Implementation Roadmap / Project Timeline
+14. Success Metrics & Acceptance Criteria
+15. Glossary
 
-Source Information:
+Formatting Requirements:
+
+- Use clear headings for each section.
+- Use bullet points where appropriate.
+- Ensure requirements are concise and structured.
+- Functional requirements should be written as clear system capabilities.
+- Non-functional requirements should cover performance, security, scalability, reliability, and usability.
+
+Project Information:
 {validated_data}
+
+Generate the complete Business Requirements Document.
 """
 
     response = llm.invoke(prompt)
